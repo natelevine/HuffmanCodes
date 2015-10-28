@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="UTF-8">
+    <title>A Huffman Codes Primer by natelevine</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="stylesheets/normalize.css" media="screen">
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
+  </head>
+  <body>
+    <section class="page-header">
+      <h1 class="project-name">A Huffman Codes Primer</h1>
+      <h2 class="project-tagline">How to Create Your Own Huffman Encoding From Any Source Text</h2>
+      <a href="https://github.com/natelevine/HuffmanCodes" class="btn">View on GitHub</a>
+      <a href="https://github.com/natelevine/HuffmanCodes/zipball/master" class="btn">Download .zip</a>
+      <a href="https://github.com/natelevine/HuffmanCodes/tarball/master" class="btn">Download .tar.gz</a>
+    </section>
+
+    <section class="main-content">
+      <h3>
+<a id="why-do-i-care-about-encoding-text" class="anchor" href="#why-do-i-care-about-encoding-text" aria-hidden="true"><span class="octicon octicon-link"></span></a>Why Do I Care About Encoding Text?</h3>
+
+<p>If you have ever heard of ASCII before, then you've heard of at least one text encoding method, a fairly simple one with 7 bits for each character. Java uses another one, that's 16-bits, but can be used to express a wider range of character types. These and other types of text encodings are used to transmit text as data over any kind of connection.  They are usually a fixed number of bits, with different unique configurations representing a different unique character.  </p>
+
+<p>Now if you're just transmitting a few words here and there, it's probably irrelevant what kind of encoding you're using. But what about if we'd like to transmit large amounts of text as efficiently as possible. That's where the number of bits you're using comes into play. If I have a very simple language that only contains 10 letters, I can represent those letters easily with just 4 bits. However, if I'm using ascii encoding to send them, I will end up with a lot of wasteful overhead. Similarly, even if I have a more complex language, it's likely that some of my characters will show up far more often than others, e.g. an 'e' in English text. If this is the case, it seems inefficient to be sending all my 'e's with just as many bits as my far less frequent letters. This is where the idea of Huffman codes come from.</p>
+
+<h3>
+<a id="what-does-huffman-code-mean" class="anchor" href="#what-does-huffman-code-mean" aria-hidden="true"><span class="octicon octicon-link"></span></a>What Does Huffman Code Mean?</h3>
+
+<p>Extending this idea just a bit farther, it seems likely that we could come up with a variable encoding method, rather than fixed, for whatever language type we are planning to transmit. This would save us a lot of space if, for instance, we could figure out which characters are common, and represent those with very short bit combinations. In kind, we would need to have longer combinations for the less common characters, otherwise we would run out of possible combinations for all the characters in our language. But this is a good tradeoff for efficiency! (assuming we can accurately discover which are the most frequently used characters). And this is exactly what a Huffman Code refers to- it's a way of encoding a certain set of characters based on the frequencies by which they occur in the set, with the goal of minimizing bit length while keeping a unique combination available for every character. This may sound complicated at first. But with relatively simple data structures, it becomes achievable, and we're going to walk through it here step by step.</p>
+
+<h3>
+<a id="constructing-a-proper-encoding-scheme" class="anchor" href="#constructing-a-proper-encoding-scheme" aria-hidden="true"><span class="octicon octicon-link"></span></a>Constructing A Proper Encoding Scheme</h3>
+
+<p>With ASCII, or other common fixed bit encodings, we know exactly where a certain character starts and stops in an encoding, because they are all the same number of bits. So, if I see: <em>1101100110110011011110100000</em>, I can parse out each letter easily by just counting by 7 bits. With a Huffman code on the other hand, this isn't so easy, since the point is that the bit encodings are all different lengths. It must be a requirement then that no encoded character can be a prefix for the encoding of another character. That way once we see an encoding we recognize, we know to stop and convert it right there, rather than wondering if it's just the start of a longer character's encoding. With this uniqueness in mind, what's the best way to </p>
+
+      <footer class="site-footer">
+        <span class="site-footer-owner"><a href="https://github.com/natelevine/HuffmanCodes">A Huffman Codes Primer</a> is maintained by <a href="https://github.com/natelevine">natelevine</a>.</span>
+
+        <span class="site-footer-credits">This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the <a href="https://github.com/jasonlong/cayman-theme">Cayman theme</a> by <a href="https://twitter.com/jasonlong">Jason Long</a>.</span>
+      </footer>
+
+    </section>
+
+  
+  </body>
+</html>
