@@ -1,25 +1,34 @@
 <!DOCTYPE html>
-<html lang="en-us">
+<html>
   <head>
-    <meta charset="UTF-8">
-    <title>A Huffman Codes Primer by natelevine</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" type="text/css" href="stylesheets/normalize.css" media="screen">
-    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link href='https://fonts.googleapis.com/css?family=Architects+Daughter' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
     <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
-  </head>
-  <body>
-    <section class="page-header">
-      <h1 class="project-name">A Huffman Codes Primer</h1>
-      <h2 class="project-tagline">How to Create Your Own Huffman Encoding From Any Source Text</h2>
-      <a href="https://github.com/natelevine/HuffmanCodes" class="btn">View on GitHub</a>
-      <a href="https://github.com/natelevine/HuffmanCodes/zipball/master" class="btn">Download .zip</a>
-      <a href="https://github.com/natelevine/HuffmanCodes/tarball/master" class="btn">Download .tar.gz</a>
-    </section>
+    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print">
 
-    <section class="main-content">
-      <h3>
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <title>A Huffman Codes Primer by natelevine</title>
+  </head>
+
+  <body>
+    <header>
+      <div class="inner">
+        <h1>A Huffman Codes Primer</h1>
+        <h2>How to Create Your Own Huffman Encoding From Any Source Text</h2>
+        <a href="https://github.com/natelevine/HuffmanCodes" class="button"><small>View project on</small> GitHub</a>
+      </div>
+    </header>
+
+    <div id="content-wrapper">
+      <div class="inner clearfix">
+        <section id="main-content">
+          <h3>
 <a id="why-do-i-care-about-encoding-text" class="anchor" href="#why-do-i-care-about-encoding-text" aria-hidden="true"><span class="octicon octicon-link"></span></a>Why Do I Care About Encoding Text?</h3>
 
 <p>If you have ever heard of ASCII before, then you've heard of at least one text encoding method, a fairly simple one with 7 bits for each character. Java uses another one, that's 16-bits, but can be used to express a wider range of character types. These and other types of text encodings are used to transmit text as data over any kind of connection.  They are usually a fixed number of bits, with different unique configurations representing a different unique character.  </p>
@@ -34,15 +43,111 @@
 <h3>
 <a id="constructing-a-proper-encoding-scheme" class="anchor" href="#constructing-a-proper-encoding-scheme" aria-hidden="true"><span class="octicon octicon-link"></span></a>Constructing A Proper Encoding Scheme</h3>
 
-<p>With ASCII, or other common fixed bit encodings, we know exactly where a certain character starts and stops in an encoding, because they are all the same number of bits. So, if I see: <em>1101100110110011011110100000</em>, I can parse out each letter easily by just counting by 7 bits. With a Huffman code on the other hand, this isn't so easy, since the point is that the bit encodings are all different lengths. It must be a requirement then that no encoded character can be a prefix for the encoding of another character. That way once we see an encoding we recognize, we know to stop and convert it right there, rather than wondering if it's just the start of a longer character's encoding. With this uniqueness in mind, what's the best way to </p>
+<p>With ASCII, or other common fixed bit encodings, we know exactly where a certain character starts and stops in an encoding, because they are all the same number of bits. So, if I see: <em>1101100110110011011110100000</em>, I can parse out each letter easily by just counting by 7 bits. With a Huffman code on the other hand, this isn't so easy, since the point is that the bit encodings are all different lengths. It must be a requirement then that no encoded character can be a prefix for the encoding of another character. That way, once we see an encoding we recognize, we know to stop and convert it right there, rather than wondering if it's just the start of a longer character's encoding. With this uniqueness in mind, what's the best way to construct this encoding scheme?</p>
 
-      <footer class="site-footer">
-        <span class="site-footer-owner"><a href="https://github.com/natelevine/HuffmanCodes">A Huffman Codes Primer</a> is maintained by <a href="https://github.com/natelevine">natelevine</a>.</span>
+<p>It turns out that a very good way to do this, is using trees and a priority queue. Imagine this - you have a binary tree where each leaf has the value of a letter in your language, and the parent of those leaves is a super node with a value consisting of each of the values of its children concatenated together, and so on and so forth up the tree. Eventually, at the top of the tree is a node containing all characters in the language. This is the starting point for encoding a character into its binary counterpart.  </p>
 
-        <span class="site-footer-credits">This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the <a href="https://github.com/jasonlong/cayman-theme">Cayman theme</a> by <a href="https://twitter.com/jasonlong">Jason Long</a>.</span>
-      </footer>
+<h3>
+<a id="encoding-and-decoding-with-a-huffman-tree" class="anchor" href="#encoding-and-decoding-with-a-huffman-tree" aria-hidden="true"><span class="octicon octicon-link"></span></a>Encoding and Decoding with a Huffman Tree</h3>
 
-    </section>
+<p>If you've been following so far, we have a binary tree with one big node at the top, with a value containing all the characters in the language. As we branch down, the children each contain some number of those characters, together making up the total set of the language. Then each of those children branch down further into their own children, of which each one takes a certain set of the parent's characters. It continues on this way until it terminates at the leaves, one for each character, each in a unique spot in the tree. It's a unique spot because no other leaf has that exact path to it from the root node. This is important! This gives us our unique encoding with no overlapping prefixes. If we simply start at the top and trace a path down to the leaf node containing the character we're looking for, and write a 1 for every right branch taken, and a 0 for every left branch taken, we will compose a binary number representing that character in the encoding. Not too bad. </p>
+
+<p>This is a piece of Javascript code to do just that if you're interested in implementing it: </p>
+
+<p>````var encodeString = function(input, huffmanTree) {
+      var inputArr = input.split("");
+      var output = [];</p>
+
+<pre><code>  var traverse = function (huffmanTree, input) {
+    if (huffmanTree.val === input) {
+      return;
+  } else if (huffmanTree.right &amp;&amp; huffmanTree.right.val.indexOf(input) &gt;= 0) {
+    output.push('1');
+    traverse(huffmanTree.right, input);
+  } else if (huffmanTree.left &amp;&amp; huffmanTree.left.val.indexOf(input) &gt;= 0) {
+    output.push('0');
+    traverse(huffmanTree.left, input);
+    }
+  };
+
+  for (var i = 0; i &lt; inputArr.length; i++) {
+    traverse(huffmanTree, inputArr[i]); 
+  }
+  return output.join('');
+};````
+</code></pre>
+
+<p>What about decoding? If we wish to decode a binary string to its original character, we do the exact same process in reverse. We start at the top and traverse left and right, following the order of the binary string, and depending on whether we read a 1 or a 0 next. Finally we will arrive at a unique branch containing our character, which we write, and continue on from the top with the rest of the binary. The implementation for that is very similar to the above, so I won't show all of it here, though you can access it in the repo attached to this page.  </p>
+
+<h3>
+<a id="constructing-the-tree" class="anchor" href="#constructing-the-tree" aria-hidden="true"><span class="octicon octicon-link"></span></a>Constructing the Tree</h3>
+
+<p>So now we've seen how to encode and decode characters using a Huffman tree. But where does the tree come from in the first place? Well, that's the crux of this encoding algorithm, and it's also the tricky part. Seemingly we can construct it any way we wish, as long as we have a unique leaf for every character and the tree relatively balanced, it will work for our purposes, right? Well, technically yes, but remember that the whole point of this encoding is to save time and space by giving frequently used characters much shorter encoded strings than those infrequently used.  If we don't do that, we might as well just use fixed bit encoding. We can accomplish that goal by building the tree in a special way, using a priority queue to keep track of which characters are frequently or infrequently used in whatever language we base the tree on.</p>
+
+<p>The way a priority queue works is that it takes in elements- just like a regular queue, but each element has a priority value attached to it. This tells the queue how important it is compared to the other elements, and in fact it determines the order in which elements are extracted. This means that a priority queue is not FIFO, but rather more like a self-sorting array. Except that the 'sorting' happens when you go to extract something. The queue will do some calculation to find the highest priority item and return that first. In our implementation, we want to start building the tree from the bottom up, starting with the least frequent characters, so we will choose to sort our queue in ascending order of frequency of occurrence.</p>
+
+<p>The process of constructing the Huffman Tree is to first create a single node tree for every character seen in the base language, and push them into the queue with their frequencies as their priorities. Now we pull the two least frequent trees and create a super tree with value containing both of those characters, and new priority equal to the sum of the two lesser priorities. This tree we push back into the queue.  We pull the next two lowest priority nodes, and do the same thing, combining them into a new tree node, placing them as its children and pushing that back into the queue with its new priority. We continue in this way until there is only one element left in the queue, and its the entire Huffman Tree. This has the intended effect of having the nodes higher up in the tree be much more frequently occurring characters, thus giving them shorter encodings.  Now we can use the tree to encode and decode whatever we want. </p>
+
+<p>Here is some Javascript code to do that construction process:</p>
+
+<p>````var makeHuffmanTree = function(corpus) {</p>
+
+<pre><code>  var countFrequency = function(textBody) {
+    var freqObj = {};
+    //split to remove spaces, then get individual letters, and count occurrence in an object
+    var letters = textBody.split('');
+    letters.forEach(function(letter) {
+      //double tilde coerces to 0 if undefined, otherwise just the number, then add 1;
+      freqObj[letter] = ~~freqObj[letter] + 1;
+    });
+    return freqObj;
+  };
+
+  var queue = new PriorityQueue();
+  var frequenciesObj = countFrequency(corpus);
+  //Construct a tree for each letter, and insert them into the
+  //pqueue according to their frequency
+  for (var key in frequenciesObj) {
+    var freq = frequenciesObj[key];
+    var tree = new Tree([key]);
+    queue.insert(freq, tree);
+  }
+  // debugger;
+  while (queue.size() &gt; 1) {
+    var element1 = queue.extract();
+    var element2 = queue.extract();
+
+    var superTree = new Tree(element1.val.val.concat(element2.val.val));
+    superTree.left = element1.val;
+    superTree.right = element2.val;
+    queue.insert(element1.key + element2.key, superTree);
+  }
+
+  return queue.extract().val;
+};````
+</code></pre>
+
+<p>This code makes the assumption that you have a functioning priority queue doing proper element extraction. But if that's the case, this will construct the tree based on whatever <em>corpus</em> you pass in, meaning a body of text to base the algorithm on. This is where the algorithm will get its character frequencies from. If you pass in something in French, for example, the encoding will work very well for French sentences, but the same letters may not be as frequent in English, so the encoding scheme probably won't be as efficient. So you want to make sure to tailor your input to the type of thing you're planning to encode. At the very least, make sure every letter you're planning to encode appears at least once in the body of the corpus you pass in. </p>
+
+<p>That's the whole process of creating a Huffman Tree and using it to encode and decode text. If you'd like to mess around with this stuff more, the repo attached to this page has a Demo.html file that will do Huffman encodings based on any corpus you put in, and will even tell you how efficient it is at encoding things. </p>
+        </section>
+
+        <aside id="sidebar">
+          <a href="https://github.com/natelevine/HuffmanCodes/zipball/master" class="button">
+            <small>Download</small>
+            .zip file
+          </a>
+          <a href="https://github.com/natelevine/HuffmanCodes/tarball/master" class="button">
+            <small>Download</small>
+            .tar.gz file
+          </a>
+
+          <p class="repo-owner"><a href="https://github.com/natelevine/HuffmanCodes"></a> is maintained by <a href="https://github.com/natelevine">natelevine</a>.</p>
+
+          <p>This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the Architect theme by <a href="https://twitter.com/jasonlong">Jason Long</a>.</p>
+        </aside>
+      </div>
+    </div>
 
   
   </body>
