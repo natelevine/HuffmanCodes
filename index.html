@@ -74,7 +74,7 @@
     traverse(huffmanTree, inputArr[i]); 
   }
   return output.join('');
-};````
+};
 </code></pre>
 
 <p>What about decoding? If we wish to decode a binary string to its original character, we do the exact same process in reverse. We start at the top and traverse left and right, following the order of the binary string, and depending on whether we read a 1 or a 0 next. Finally we will arrive at a unique branch containing our character, which we write, and continue on from the top with the rest of the binary. The implementation for that is very similar to the above, so I won't show all of it here, though you can access it in the repo attached to this page.  </p>
@@ -112,7 +112,7 @@
     var tree = new Tree([key]);
     queue.insert(freq, tree);
   }
-  // debugger;
+
   while (queue.size() &gt; 1) {
     var element1 = queue.extract();
     var element2 = queue.extract();
@@ -124,7 +124,7 @@
   }
 
   return queue.extract().val;
-};````
+};
 </code></pre>
 
 <p>This code makes the assumption that you have a functioning priority queue doing proper element extraction. But if that's the case, this will construct the tree based on whatever <em>corpus</em> you pass in, meaning a body of text to base the algorithm on. This is where the algorithm will get its character frequencies from. If you pass in something in French, for example, the encoding will work very well for French sentences, but the same letters may not be as frequent in English, so the encoding scheme probably won't be as efficient. So you want to make sure to tailor your input to the type of thing you're planning to encode. At the very least, make sure every letter you're planning to encode appears at least once in the body of the corpus you pass in. </p>
